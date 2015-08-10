@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>HTML5刮刮乐</title>
+</head>
+<body>
+	<div class="main">
+		<div class="msg">刮开灰色看看
+			<a href="javascript:void(0)" onclick="window.location.reload()">再来一次</a>
+		</div>
+		<div>
+			<canvas></canvas>
+		</div>
+	</div>
+
+	<script>
+		var bodyStyle = document.body.style;
+		bodyStyle.mozUserSelect = 'none';
+		bodyStyle.webkitUserSelect = 'none'; 
+
+		var img = new Image();
+		var canvas = document.querySelector('canvas');
+
+		var imgs = ['p_0.png','p_1.png','p_2.png','p_3.png'];
+		var num = Math.floor(Math.random()*4);
+		img.src = imgs[num];
+
+		img.addEventListener('load',function(e){
+			var ctx;
+			var w = img.width;
+			var h = img.height;
+			var offsetX = canvas.offsetLeft;
+			var offsetY = canvas.offsetTop;
+			var mousedown = false;
+	
+			canvas.width = w;
+			canvas.height = h;
+			canvas.style.backgroundImage = 'url('+img.src+')';
+			ctx = canvas.getContext('2d');
+			layer(ctx);
+
+			ctx.globalCompositeOperation = 'destination-out';//lobalCompositeOperation 属性设置或返回如何将一个源（新的）图像绘制到目标（已有）的图像上;destination-out表示：在源图像之外显示目标图像。只有源图像之外的目标图像部分会被显示，源图像是透明的。这里的效果就是，原来的灰色矩形代表已有图像，新图像是透明的，新图像划过的地方就不会显示原来的灰色了
+			canvas.addEventListener('touchstart',eventDown);
+			canvas.addEventListener('touchend', eventUp);
+			canvas.addEventListener('touchmove', eventMove);
+			canvas.addEventListener('mousedown', eventDown);
+			canvas.addEventListener('mouseup', eventUp);
+			canvas.addEventListener('mousemove', eventMove);
+
+			function layer(ctx){
+				ctx.fillStyle = 'gray';
+				ctx.fillRect(0,0,w,h);
+			}
+			function eventDown(e){
+				e.preventDefault();
+				mousedown = true;
+			}
+			function eventUp(e){
+				e.preventDefault();
+				mousedown = false;
+			}
+
+			function eventMove(e){
+				e.preventDefault();
+				if(mousedown){
+					if(e.changedTouches){
+						e = e.changedTouches[e.changedTouches.length-1];//changedTouches：最近一次触发该事件的手指信息：比如两个手指同时触发事件，2个手指都在区域内，则容量为2，如果是先后离开的的话，就会先触发一次再触发一次，这里的length就是1，只统计最新的。PS：一般changedTouches的length都是1
+					}
+					var x = (e.clientX + document.body.scrollLeft || e.pageX) - offsetX || 0;
+					var y = (e.clientY + document.body.scrollTop || e.pageY) - offsetY || 0; 
+					with(ctx){
+						beginPath();
+						arc(x,y,10,0,Math.PI*2);
+						fill();
+
+					}
+				}
+			}
+		});
+	</script>
+</body>
+
+</html>
